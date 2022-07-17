@@ -71,6 +71,12 @@ input, select, textarea {
 	appearance: none;
 }
 
+/* sqltestingframework */
+span.failing-test {
+  background-color: red;
+  color: white;
+}
+
 /* Basic */
 
 	@-ms-viewport {
@@ -3907,3 +3913,7 @@ input, select, textarea {
 			}
 
 		}
+
+  /* get started */
+	#hero-code-sample {
+	}

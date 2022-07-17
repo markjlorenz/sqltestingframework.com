@@ -16,3 +16,4 @@ WITH text AS (
   SELECT 0 AS value
 )
 :evaluate_test;
+

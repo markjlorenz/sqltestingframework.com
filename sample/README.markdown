@@ -36,3 +36,15 @@ postgres pg_restore \
   --dbname postgres \
   ./dvdrental.tar
 ```
+
+```sh
+# connect to the test database
+docker run -it --rm \
+  --env PGPASSWORD="$PG_PASSWORD" \
+  --volume "$PWD":/work \
+  --workdir /work \
+postgres psql \
+  -h host.docker.internal \
+  -p "$PG_PORT" \
+  -U postgres
+```
