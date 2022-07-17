@@ -3917,3 +3917,11 @@ span.failing-test {
   /* get started */
 	#hero-code-sample {
 	}
+
+	#contributing {
+		background-attachment: fixed;
+		background-image: url("images/intro.svg");
+		background-position: top right;
+		background-repeat: no-repeat;
+		background-size: 100% 100%;
+	}
