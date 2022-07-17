@@ -3919,6 +3919,14 @@ span.failing-test {
 	}
 
 	#contributing {
+		/* background-attachment: fixed; */
+		/* background-image: url("images/intro.svg"); */
+		/* background-position: top right; */
+		/* background-repeat: no-repeat; */
+		/* background-size: 100% 100%; */
+	}
+
+	#sql-testing-framework-101 {
 		background-attachment: fixed;
 		background-image: url("images/intro.svg");
 		background-position: top right;
@@ -3931,8 +3939,9 @@ span.failing-test {
     max-height: 100%;
   }
 
-  #header .logo {
+  #header a .logo {
    max-height: 2em;
-   padding-left: 1em;
    padding-right: 1em;
+   vertical-align: middle;
   }
+
