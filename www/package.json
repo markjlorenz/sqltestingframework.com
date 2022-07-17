@@ -1,0 +1,23 @@
+{
+  "name": "www.sqltestingframework.com",
+  "version": "1.-.0",
+  "description": "How to test SQL queries",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geocine/phaser3-rollup-typescript.git"
+  },
+  "author": "Mark Lorenz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/geocine/phaser3-rollup-typescript/issues"
+  },
+  "homepage": "https://www.sqltestingframework.com",
+  "devDependencies": {},
+  "dependencies": {}
+}
