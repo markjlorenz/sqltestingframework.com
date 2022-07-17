@@ -10,7 +10,7 @@ export PG_PORT="5432"
 docker run -it --rm \
   --publish "$PG_PORT":5432 \
 	--env POSTGRES_PASSWORD="$PG_PASSWORD" \
-	postgres
+postgres
 ```
 
 ```
