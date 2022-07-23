@@ -41,8 +41,8 @@ postgres pg_restore \
 # connect to the test database
 docker run -it --rm \
   --env PGPASSWORD="$PG_PASSWORD" \
-  --volume "$PWD":/work \
-  --workdir /work \
+  --volume "$PWD/queries":/queries \
+  --workdir /queries \
 postgres psql \
   -h host.docker.internal \
   -p "$PG_PORT" \
