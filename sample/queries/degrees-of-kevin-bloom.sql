@@ -46,6 +46,7 @@ SELECT
   summary.degree
   ,actor.first_name
   ,actor.last_name
+  ,actor.actor_id
 FROM summary
 JOIN actor
   ON actor.actor_id = summary.actor_id
