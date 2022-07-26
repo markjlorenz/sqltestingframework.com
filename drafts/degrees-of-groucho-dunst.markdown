@@ -15,7 +15,7 @@ Your boss is starting the day late again, it's 1:00PM and she's active 🟢 in S
 >
 > K, thx, bye.
 
-You <em>knew</em> it.  Better get to work.  The last time Holcombs had a genious idea it was more work to talk her out of it than to just do the work.  Anyway, this does sound like a fun assignment (for you anyway- pitty to the poor store managers and their holiday plans). Since the stores can only hold four rows of movies, this will be "four degrees of Groucho Dunst."
+You <em>knew</em> it.  Better get to work.  The last time Holcombs had a genius idea it was more work to talk her out of it than to just do the work.  Anyway, this does sound like a fun assignment (for you anyway- pity to the poor store managers and their holiday plans). Since the stores can only hold four rows of movies, this will be "four degrees of Kevin Bloom."
 
 <blockquote>instructions for getting the database</blockquote>
 
@@ -231,16 +231,14 @@ This gives us a good feeling about the first-order connections:
 
 <pre>
     <code>
-Expect:
-{2,5,8,9,10,12,14,16,17,19,20,21,22,23,26,29,32,35,36,37,38,39,41,44,46,48,50,51,53,56,57,58,60,62,66,68,69,73,76,77,78,80,81,87,89,92,94,95,97,100,102,104,105,106,107,111,112,114,115,116,118,119,123,125,126,127,128,132,136,137,138,142,143,146,147,148,149,150,152,155,160,165,166,169,172,173,177,178,181,183,185,187,188,190,191,192,194,198,200}
-
-Actual:
-{2,5,8,9,10,12,14,16,17,19,20,21,22,23,26,29,32,35,36,37,38,39,41,44,46,48,50,51,53,56,57,58,60,62,66,68,69,73,76,77,78,80,81,87,89,92,94,95,97,100,102,104,105,106,107,111,112,114,115,116,118,119,123,125,126,127,128,132,136,137,138,142,143,146,147,148,149,150,152,155,160,165,166,169,172,173,177,178,181,183,185,187,188,190,191,192,194,198,200}
-
-Did Pass: t
-Text: The first order actors are correct
+    actual     |    expect     | did_pass |             text
+---------------+---------------+----------+------------------------------------
+ {2,5,8…8,200} | {2,5,8…8,200} | t        | The first order actors are correct
+(1 row)
     </code>
 <pre>
+
+<blockquote>If the test is passing the Sql Testing Framework automatically truncates the <code>actual</code> and <code>expect</code> displays.  If the test had failed, we would see the full results of both.</blockquote>
 
 Second-order connections are anyone who was in a movie with a first-order connection (assuming they themselves are not a first order connection).  Verifying the second-order actors is just another iteration of the first order test:
 
@@ -320,14 +318,11 @@ WITH text AS (
 
 <pre>
     <code>
-Expect:
-{1,3,4,6,7,11,13,15,18,24,27,28,30,31,33,34,40,42,43,45,47,49,52,54,55,59,61,63,64,65,67,70,71,72,74,75,79,82,83,84,85,86,88,90,91,93,96,98,99,101,103,108,109,110,113,117,120,121,122,124,129,130,131,133,134,135,139,140,141,144,145,151,153,154,156,157,158,159,161,162,163,164,167,168,170,171,174,175,176,179,180,182,184,186,189,193,195,196,197,199}
-
-Actual:
-{1,3,4,6,7,11,13,15,18,24,27,28,30,31,33,34,40,42,43,45,47,49,52,54,55,59,61,63,64,65,67,70,71,72,74,75,79,82,83,84,85,86,88,90,91,93,96,98,99,101,103,108,109,110,113,117,120,121,122,124,129,130,131,133,134,135,139,140,141,144,145,151,153,154,156,157,158,159,161,162,163,164,167,168,170,171,174,175,176,179,180,182,184,186,189,193,195,196,197,199}
-
-Did Pass: t
-Text: The second order actors are correct
+    actual     |    expect     | did_pass |                        text
+---------------+---------------+----------+------------------------------------
+ {2,5,8…8,200} | {2,5,8…8,200} | t        | The first order actors are correct
+ {1,3,4…7,199} | {1,3,4…7,199} | t        | The second order actors are correct
+(2 rows)
     </code>
 <pre>
 

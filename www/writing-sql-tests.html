@@ -14,17 +14,26 @@
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GZFJRFSDHX"></script>
     <script src="assets/js/analytics.js"></script>
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Writing SQL Tests" />
+    <meta name="twitter:description" content="A step-by-step tutorial on writing tests for SQL." />
+    <meta name="twitter:image" content="https://www.sqltestingframework.com/images/getting-wrong-result.jpeg" />
+
+    <meta property="og:title" content="Writing SQL Tests" />
+    <meta property="og:description" content="A step-by-step tutorial on writing tests for SQL." />
+    <meta property="og:image" content="https://www.sqltestingframework.com/images/getting-wrong-result.jpeg" />
 	</head>
 
 	<body class="is-preload">
 
 		<!-- Header -->
 			<header id="header">
-				<a href="index.html" class="title"><img class="logo" src="images/logo_transparent.png" /> SQL Testing Framework</a>
+				<a href="index.html" class="title"><img class="logo" src="/images/logo_transparent.png" /> SQL Testing Framework</a>
 				<nav>
 					<ul>
 						<li><a href="index.html">Home</a></li>
-            <!--<li><a href="running-sql-test.html" class="active">Running SQL Tests</a></li>-->
+            <li><a href="testing-sql-query-results.html" class="active">Testing SQL Query Results</a></li>
 					</ul>
 				</nav>
 			</header>
@@ -38,7 +47,7 @@
             <h1 class="major">Writing SQL Tests</h1>
 
             <p><strong>Goal:</strong> Work with an unfamiliar dataset and be confident in the final analysis.</p>
-            <span class="image fit"><img src="images/getting-wrong-result.jpeg" alt="" /></span>
+            <span class="image fit"><img src="/images/getting-wrong-result.jpeg" alt="Getting the wrong query result" /></span>
 
             <h2>Setup</h2>
 
@@ -351,11 +360,16 @@ WHERE rental.rental_date BETWEEN :today - '7 days'::interval AND :today
 
             <p>This is significantly less exciting than we had originally thought (<code>$21,767.03</code>), and we should probably ask the CFO how they want to handle payments on rental that are being made in the future 🤷‍♂️.  It's not obvoius what the GAAP rules are for that!</p>
 
-            <p>SQL Testing Framework has given us a simple workflow to check the assumptions we made about the dataset and prevented us from deliverying a wildly over-inflated payments number!</p>
+            <p>SQL Testing Framework has given us a simple workflow to check the assumptions we made about the dataset and prevented us from delivering a wildly over-inflated payments number!</p>
 
             <p class="align-center">The code for this example is <a href="https://github.com/markjlorenz/sqltestingframework.com" class="button brands icon solid fa-github"> available on Github</a></p>
 
 						</div>
+					</section>
+          <section id="main" class="wrapper style3">
+            <div class="inner" style="text-align: center;">
+              <p>Up next: Testing queries that don't write to the database. <a class="button icon solid fa-hand-point-right" href="/testing-sql-query-results.html">Learn how</a></p>
+            </div>
 					</section>
 
 			</div>
