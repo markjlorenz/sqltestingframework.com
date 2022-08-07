@@ -29,7 +29,7 @@ amazon/aws-cli s3 cp ./ s3://www.sqltestingframework.com --recursive \
   --exclude "package.json" \
   --exclude "yarn.lock" \
   --exclude "yarn-error.log" \
-  --exclude "node_modules/*" \
+  --exclude "node_modules/*"
 ```
 
 Make sure there's an AWS user with this policy attached:
