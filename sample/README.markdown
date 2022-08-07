@@ -9,7 +9,7 @@ export PG_PORT="5432"
 # run the database server
 docker run -it --rm \
   --publish "$PG_PORT":5432 \
-	--env POSTGRES_PASSWORD="$PG_PASSWORD" \
+  --env POSTGRES_PASSWORD="$PG_PASSWORD" \
 postgres
 ```
 

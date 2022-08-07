@@ -34,6 +34,7 @@
 					<ul>
 						<li><a href="index.html">Home</a></li>
             <li><a href="testing-sql-query-results.html" class="active">Testing SQL Query Results</a></li>
+            <li><a href="precheck-assertions-for-sql-queries.html" class="active">Precheck Assertions for SQL Queries</a></li>
 					</ul>
 				</nav>
 			</header>
@@ -57,33 +58,26 @@
 
             <blockquote>
               Get a copy of the StreamBuster database, so you can following along at home:
-              <pre>
-  <code>
-curl \
+<pre><code>curl \
   --location \
   --remote-header-name \
   --remote-name \
 https://github.com/robconery/dvdrental/raw/master/dvdrental.tar > dvdrental.tar
-  </code>
-              </pre>
+</code></pre>
 
               Startup your database:
-              <pre>
-  <code>
-export PG_PASSWORD="password"
+<pre><code>export PG_PASSWORD="password"
 export PG_PORT="5432"
 
 docker run -it --rm \
   --publish "$PG_PORT":5432 \
   --env POSTGRES_PASSWORD="$PG_PASSWORD" \
 postgres
-  </code>
-              </pre>
+ </code></pre>
 
-              Load the data into your database:
-              <pre>
-  <code>
-docker run -it --rm \
+         <p>Load the data into your database:</p>
+
+<pre><code>docker run -it --rm \
   --env PGPASSWORD="$PG_PASSWORD" \
   --volume "$PWD":/work \
   --workdir /work \
@@ -94,27 +88,22 @@ postgres pg_restore \
   --verbose \
   --dbname postgres \
   ./dvdrental.tar
-  </code>
-              </pre>
+</code></pre>
+
             </blockquote>
 
             <h2>Get to work</h2>
 
             <p>Let's get to work.  It's a good practice to start with SQL Testing Framework, before you start writing queries:</p>
 
-            <pre>
-  <code>
-mkdir queries
+<pre><code> mkdir queries
 cd queries
 git clone git@github.com:markjlorenz/sqltestingframework.git
-  </code>
-            </pre>
+</code></pre>
 
             <p>Now we can connect to StreamBuster's database, and have a quick look around to see how they've structured their database:</p>
 
-            <pre>
-  <code>
-docker run -it --rm \
+<pre><code>docker run -it --rm \
   --env PGPASSWORD="$PG_PASSWORD" \
   --volume "$PWD":/work \
   --workdir /work \
@@ -145,14 +134,11 @@ postgres=# \dt
  public | store            | table | postgres
  public | tmp_test_results | table | postgres
 (16 rows)
-  </code>
-            </pre>
+</code></pre>
 
             <p>It looks like a pretty nicely normalized database.  Feeling good about the decision to join this startup, we are crushing it already.  What infomration is available to us in the <code>rental</code> table?</p>
 
-            <pre>
-  <code>
-postgres=# \d rental
+<pre><code>postgres=# \d rental
 
                                                Table "public.rental"
     Column    |            Type             | Collation | Nullable |                  Default
@@ -164,13 +150,11 @@ postgres=# \d rental
  return_date  | timestamp without time zone |           |          |
  staff_id     | smallint                    |           | not null |
  last_update  | timestamp without time zone |           | not null | now()
-  </code>
-            </pre>
+</code></pre>
 
             <p>This will work.  We should be able to go home early today, drink an IPA and trade x-men cards with our friends!  Let's write a query in the <code>queries/</code> directory called <code>last-week-sales.sql</code>  We can find the dollar amount of rentals by:</p>
-            <pre>
-  <code>
--- queries/last-week-sales.sql
+
+<pre><code>-- queries/last-week-sales.sql
 --
 SELECT
   SUM(payment.amount)::money
@@ -184,16 +168,13 @@ WHERE rental.rental_date > '2005-08-02'    -- today is 09-August-2005
 ------------
  $21,767.03
 (1 row)
-  </code>
-            </pre>
+</code></pre>
 
             <p>Very nice. This company is doing great, and I'm sure your stock options will be worth billions.  Before we hand this in to the CFO, let's use the SQL Testing Framework to sanity check our work.</p>
 
             <p>We might want to know if a <code>rental</code> can have more than one <code>payment</code>.  We don't think StreamBuster offers consumer financing, but that could be the next pivot.  Let's use the SQL Testing Framework to check:</p>
 
-            <pre>
-  <code>
--- queries/test/last-week-sales.sql
+<pre><code>-- queries/test/last-week-sales.sql
 --
 WITH text AS (
   SELECT 'Rentals can only have one payment' AS value
@@ -208,8 +189,7 @@ WITH text AS (
   LIMIT 1
 )
 :evaluate_test;
-  </code>
-            </pre>
+</code></pre>
 
             <p>The SQL Tesing Framework has just a few things that it needs from us as users:</p>
             <ul>
@@ -219,23 +199,18 @@ WITH text AS (
               <li>A call to <code>:evaluate_test;</code>  This is how you tell SQL Testing Framekwork that it should evaluate a test case on the CTEs above it.</li>
             </ul>
 
-            <pre>
-  <code>
-$ cd ~/queries/test
+<pre><code>$ cd ~/queries/test
 $ ./runner.sh
 .
  actual | expect | did_pass |               text
 --------+--------+----------+-----------------------------------
 <span class="failing-test"> 5      | 1      | f        | Rentals can only have one payment </span>
 (1 row)
-  </code>
-            </pre>
+</code></pre>
 
             <p>Oh no!  It looks like StreamBuster has been offering consumer credit. In some cases 5 payments were made for one rental.  This is concerning, let's check a few more things.  Can a payment happen before a rental?</p>
 
-            <pre>
-  <code>
-WITH text AS (
+<pre><code>WITH text AS (
   SELECT 'Payments can not happen before rentals' AS value
 ), expect AS (
   SELECT 0 AS value
@@ -248,26 +223,20 @@ WITH text AS (
   WHERE payment.payment_date :&lt; rental.rental_date
       )
       :evaluate_test;
-  </code>
-            </pre>
+</code></pre>
 
-            <pre>
-  <code>
-$ ./runner.sh
+<pre><code>$ ./runner.sh
 .
  actual | expect | did_pass |                  text
 --------+--------+----------+----------------------------------------
 <span class="failing-test"> 5      | 1      | f        | Rentals can only have one payment      </span>
  0      | 0      | t        | Payments can not happen before rentals
 (2 rows)
-  </code>
-            </pre>
+</code></pre>
 
             <p>Ok, good- at least StreamBuster isn't accepting pre-payments for rentals.  I wonder how much time StreamBuster gives their customers to pay.  The CEO mentioned something about cash flow at the All-Hands bar crawl.</p>
 
-            <pre>
-  <code>
-WITH text AS (
+<pre><code>WITH text AS (
   SELECT 'Most renters make their last payment within 60 days' AS value
 ), expect AS (
   SELECT 60 AS value
@@ -285,12 +254,9 @@ WITH text AS (
   FROM payment_periods
 )
 :evaluate_test;
-  </code>
-            </pre>
+</code></pre>
 
-            <pre>
-  <code>
-$ ./runner.sh
+<pre><code>$ ./runner.sh
 .
   actual | expect | did_pass |                        text
 --------+--------+----------+-----------------------------------------------------
@@ -299,16 +265,13 @@ $ ./runner.sh
 <span class="failing-test"> 607    | 60     | f        | Most renters make their last payment within 60 days </span>
 <span class="failing-test"> 4554   | 0      | f        | Rentals can not happen in the future                </span>
 (3 rows)
-  </code>
-            </pre>
+</code></pre>
 
             <p>This is not good.  It looks like on average, it's taking renters 607 days to make their last payment.  This startup has fantastic revenue, but there probably isn't enough cash in the bank to pay the sea shanty quitntet that was in the office yestereday.</p>
 
             <p>Let's check one more thing before handing in our resignation.  In the original query, we looked at revenue in the last week with <code>WHERE rental.rental_date > '2005-08-02' -- today is 09-August-2005</code>, assuming that rentals in the future are not possible.  Let's check that:</p>
 
-            <pre>
-  <code>
-\set today '\'2005-08-09\'::date'
+<pre><code>\set today '\'2005-08-09\'::date'
 WITH text AS (
   SELECT 'Rentals can not happen in the future' AS value
 ), expect AS (
@@ -321,12 +284,9 @@ WITH text AS (
 )
 :evaluate_test;
 \unset today
-  </code>
-            </pre>
+</code></pre>
 
-            <pre>
-  <code>
-$ ./runner.sh
+<pre><code>$ ./runner.sh
 .
   actual | expect | did_pass |                        text
 --------+--------+----------+-----------------------------------------------------
@@ -335,14 +295,11 @@ $ ./runner.sh
 <span class="failing-test"> 607    | 60     | f        | Most renters make their last payment within 60 days </span>
 <span class="failing-test"> 4554   | 0      | f        | Rentals can not happen in the future                </span>
 (4 rows)
-  </code>
-            </pre>
+</code></pre>
 
             <p>Since rentals are happening in the future, we need to re-think our original query.  If we want to know how many payments were recieved for rentals in the last week, well need to change our query like this:</p>
 
-            <pre>
-  <code>
-\set today '\'2005-08-09\'::date'
+<pre><code>\set today '\'2005-08-09\'::date'
 SELECT
   SUM(payment.amount)::money
 FROM rental
@@ -355,8 +312,7 @@ WHERE rental.rental_date BETWEEN :today - '7 days'::interval AND :today
 -----------
  $2,726.57
 (1 row)
-  </code>
-            </pre>
+</code></pre>
 
             <p>This is significantly less exciting than we had originally thought (<code>$21,767.03</code>), and we should probably ask the CFO how they want to handle payments on rental that are being made in the future 🤷‍♂️.  It's not obvoius what the GAAP rules are for that!</p>
 
