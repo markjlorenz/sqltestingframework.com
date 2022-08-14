@@ -74,7 +74,7 @@ GROUP BY store_id, DATE_PART('month', payment_date)
 ;
 </code></pre>
 
-            <p>Here we make use of the <code>USING</code> keyword to make the query shorter and easier to read.</p>
+            <p>Here we make use of the <code>USING</code> keyword to keep the query short and easy to read.</p>
 
             <p>With a query that does a roll-up like this, rolling stores and dates up into an aggregate, it's usually a good idea to spot-check a few to make sure that the roll-up is right.  This is straightforward with SQL Testing Framework:</p>
 
