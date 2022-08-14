@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>
+<!--
+	Hyperspace by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>SQL Testing Framework Docs</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GZFJRFSDHX"></script>
+    <script src="assets/js/analytics.js"></script>
+
+  <!--   <meta name="twitter:card" content="summary" /> -->
+  <!--   <meta name="twitter:title" content="Precheck Assertions for SQL Queries" /> -->
+  <!--   <meta name="twitter:description" content="Guard against 'errors of equality' where your test passes, but not for the reasons you thought it would." /> -->
+  <!--   <meta name="twitter:image" content="https://www.sqltestingframework.com/images/precheck&#45;for&#45;sql&#45;queries.jpeg" /> -->
+  <!--  -->
+  <!--   <meta property="og:title" content="Precheck Assertions for SQL Queries" /> -->
+  <!--   <meta property="og:description" content="Guard against 'errors of equality' where your test passes, but not for the reasons you thought it would." /> -->
+  <!--   <meta property="og:image" content="https://www.sqltestingframework.com/images/precheck&#45;for&#45;sql&#45;queries.jpeg" /> -->
+	</head>
+
+	<body class="is-preload">
+
+		<!-- Header -->
+			<header id="header">
+				<a href="index.html" class="title"><img class="logo" src="/images/logo_transparent.png" /> SQL Testing Framework</a>
+				<nav>
+					<ul>
+						<li><a href="index.html">Home</a></li>
+            <li><a href="testing-sql-query-results.html" class="active">Testing SQL Query Results</a></li>
+            <li><a href="writing-sql-tests.html" class="active">Writing SQL Tests</a></li>
+            <li><a href="precheck-assertions-for-sql-queries.html" class="active">Precheck Assertions</a></li>
+					</ul>
+				</nav>
+			</header>
+
+      <!-- Wrapper -->
+      <div id="wrapper">
+
+        <!-- Main -->
+        <section id="main" class="wrapper">
+          <div class="inner">
+            <h1 class="major">SQL Testing Framework API Docs</h1>
+
+            <p>The SQL Testing Framework API is very simple.  All tests start with common table expressions (CTEs) that include <code>text</code>, <code>expect</code>, and <code>actual</code> expressions and end with the <code>:evaluate_test</code> variable.</p>
+
+<pre><code>WITH text AS (
+  SELECT 'return_date is never earlier than rental_date' AS value
+), actual AS (
+  SELECT
+    COUNT(*) AS value
+  FROM rental
+  WHERE return_date &lt; rental_date
+), expect AS (
+  SELECT 0 AS value
+)
+:evaluate_test
+</code></pre>
+
+            <p>When testing a query result instead of the data in the database, the same format is followed, but setup and cleanup are added.  The variable <code>:setup_test</code> creates a temp table with a name defined by the<code>:query</code> variable.  This lets us access our query results in <code>expect</code> and <code>acutal</code>.</p>
+
+<pre><code><span class="highlight">\set query /queries/sales-by-store.sql</span>
+<span class="highlight">:setup_test</span>
+WITH text AS (
+  SELECT 'Store #1 has the right number of sales' AS value
+), expect AS (
+  SELECT
+    SUM(payment.amount) AS value
+  FROM store
+  JOIN staff USING(store_id)
+  JOIN payment USING(staff_id)
+  WHERE store_id = 1
+    AND DATE_PART('month', payment_date) = 3
+), actual AS (
+  SELECT
+    total_payment AS value
+<span class="highlight">  FROM "/queries/sales-by-store.sql"</span>
+  WHERE store_id = 1
+    AND payment_month = 3
+)
+:evaluate_test
+<span class="highlight">:cleanup_test</span>
+</code></pre>
+
+            <p>Any expressions that insert <code>TRUE</code> or <code>FALSE</code> values into the <code>:"prechecks"</code> table are evaluated as precheck assertions.  Precheck assertions that are <code>FALSE</code> will cause the test to be marked ask failed, with a <code>did_pass</code> value of <code>f-pre</code>.</p>
+
+<pre><code>\set query /queries/sales-by-store.sql
+:setup_test
+WITH text AS (
+  SELECT 'Store #1 has the right number of sales' AS value
+), expect AS (
+  SELECT
+    SUM(payment.amount) AS value
+  FROM store
+  JOIN staff USING(store_id)
+  JOIN payment USING(staff_id)
+  WHERE store_id = 1
+    AND DATE_PART('month', payment_date) = 3
+<span class="highlight">), precheck_not_blank AS (</span>
+<span class="highlight">  INSERT INTO :"prechecks" (value)</span>
+<span class="highlight">  SELECT COALESCE(SUM(value) &gt; 0, FALSE)</span>
+<span class="highlight">  FROM expect</span>
+<span class="highlight">), precheck_that_always_fails AS (</span>
+<span class="highlight"> INSERT INTO :"prechecks" (value)</span>
+<span class="highlight"> SELECT FALSE</span>
+), actual AS (
+  SELECT
+    total_payment AS value
+  FROM "/queries/sales-by-store.sql"
+  WHERE store_id = 1
+    AND payment_month = 3
+)
+:evaluate_test
+:cleanup_test
+</code></pre>
+
+						</div>
+					</section>
+
+          <section id="main" class="wrapper style3">
+            <div class="inner" style="text-align: center;">
+              <p>Learn by example. <a class="button icon solid fa-hand-point-right" href="/writing-sql-tests.html">Writing SQL tests</a></p>
+            </div>
+					</section>
+
+			</div>
+
+		<!-- Footer -->
+			<footer id="footer" class="wrapper style1-alt">
+				<div class="inner">
+					<ul class="menu">
+						<li>&copy;2022 Mark J. Lorenz. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
