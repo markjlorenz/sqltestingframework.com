@@ -1,12 +1,10 @@
---  rental_duration
---  rental_rate
---  length
---  replacement_cost
+-- Returns a table of histogram stats
+-- you need to set `tbl` and `col` before including this script.
+-- Useful for debugging with then skew precheck fails.
 
 -- \set tbl payment
 -- \set col amount
-\set tbl payment
-\set col amount
+-- \include test/utils/histogram.sql
 WITH smallest (label, value) AS (
   SELECT
      'min'
