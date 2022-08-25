@@ -34,8 +34,9 @@
 					<ul>
 						<li><a href="index.html">Home</a></li>
 						<li><a href="docs.html">Docs</a></li>
-            <li><a href="testing-sql-query-results.html" class="active">Testing SQL Query Results</a></li>
             <li><a href="writing-sql-tests.html" class="active">Writing SQL Tests</a></li>
+            <li><a href="testing-sql-query-results.html" class="active">Testing SQL Query Results</a></li>
+            <li><a href="sql-testing-for-skew.html" class="active">Testing for Skew</a></li>
 					</ul>
 				</nav>
 			</header>
@@ -103,7 +104,7 @@ WITH text AS (
 
             <p>We're just checking to make sure that the roll up for Store #3 in March is correct.  The test runner gives us a passing test:</p>
 
-<pre><code>actual | expect | did_pass |                  text
+<pre><code> actual | expect | did_pass |                  text
 --------+--------+----------+----------------------------------------
         |        | true     | Store #1 has the right number of sales
 (1 row)
@@ -140,10 +141,10 @@ WITH text AS (
   JOIN payment USING(staff_id)
   WHERE store_id = 3
     AND DATE_PART('month', payment_date) = 3
-), precheck_not_blank AS (
-  INSERT INTO :"prechecks" (value)
-  SELECT COALESCE(SUM(value) &gt; 0, FALSE)
-  FROM expect
+<span class="highlight">), precheck_not_blank AS (</span>
+<span class="highlight">  INSERT INTO :"prechecks" (value)</span>
+<span class="highlight">  SELECT COALESCE(SUM(value) &gt; 0, FALSE)</span>
+<span class="highlight">  FROM expect</span>
 ), actual AS (
   SELECT
     total_payment AS value
@@ -165,7 +166,7 @@ WITH text AS (
 
             <p>The <code>prechecks</code> table has one <code>BOOLEAN</code> column that the test runner will inspect.  Now our test runner output looks like this:</p>
 
-<pre><code>actual | expect | did_pass |                  text
+<pre><code> actual | expect | did_pass |                  text
 --------+--------+----------+----------------------------------------
 <span class="failing-test">        |        | f-pre    | Store #3 has the right number of sales</span>
 (1 row)
@@ -202,7 +203,7 @@ WITH text AS (
 :cleanup_test
 </code></pre>
 
-<pre><code>actual  |  expect  | did_pass |                  text
+<pre><code> actual  |  expect  | did_pass |                  text
 ----------+----------+----------+----------------------------------------
  11776.83 | 11776.83 | true     | Store #1 has the right number of sales
 (1 row)
@@ -246,7 +247,7 @@ WITH text AS (
 
             <p>Of course this a contrived example, you'd never actually want a precheck assertion that always fails.  For demonstration purposes, our test runner output is failing again:</p>
 
-<pre><code>actual  |  expect  | did_pass |                  text
+<pre><code> actual  |  expect  | did_pass |                  text
 ----------+----------+----------+----------------------------------------
 <span class="failing-test"> 11776.83 | 11776.83 | f-pre    | Store #1 has the right number of sales</span>
 (1 row)
@@ -276,6 +277,11 @@ FROM stf.test_results
             <p class="align-center">The code for this example is <a href="https://github.com/markjlorenz/sqltestingframework.com" class="button brands icon solid fa-github"> available on Github</a></p>
 
 						</div>
+					</section>
+          <section id="main" class="wrapper style3">
+            <div class="inner" style="text-align: center;">
+              <p>Up next: testing for skew in the data. <a class="button icon solid fa-hand-point-right" href="/sql-testing-for-skew.html">Learn how</a></p>
+            </div>
 					</section>
 
 			</div>

@@ -77,9 +77,21 @@ span.failing-test {
   color: white;
 }
 
+pre span.failing-test {
+  padding-right: 1em;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
 span.highlight {
   background-color: yellow;
   color: black;
+}
+
+pre span.highlight {
+  padding-right: 1em;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 /* Basic */

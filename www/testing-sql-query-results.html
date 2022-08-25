@@ -35,7 +35,8 @@
 						<li><a href="index.html">Home</a></li>
 						<li><a href="docs.html">Docs</a></li>
             <li><a href="writing-sql-tests.html" class="active">Writing SQL Tests</a></li>
-            <li><a href="precheck-assertions-for-sql-queries.html" class="active">Precheck Assertions for SQL Queries</a></li>
+            <li><a href="precheck-assertions-for-sql-queries.html" class="active">Precheck Assertions</a></li>
+            <li><a href="sql-testing-for-skew.html" class="active">Testing for Skew</a></li>
 					</ul>
 				</nav>
 			</header>
@@ -232,7 +233,7 @@ WITH text AS (
 </code></pre>
                 <p>This an encouraging result, our query doesn't produce any duplicate actors.</p>
 
-<pre><code>actual     |    expect     | did_pass |                        text
+<pre><code> actual     |    expect     | did_pass |                        text
 ---------------+---------------+----------+-----------------------------------------------------
  200           | 200           | t        | Each actor can only be in a single "degree" group
 (1 row)
@@ -288,7 +289,7 @@ WITH text AS (
 
                 <p>This gives us a good feeling about the first-degree connections:</p>
 
-<pre><code>actual     |    expect     | did_pass |                        text
+<pre><code> actual     |    expect     | did_pass |                        text
 ---------------+---------------+----------+-----------------------------------------------------
  200           | 200           | t        | Each actor can only be in a single "degree" group
  {2,5,8…8,200} | {2,5,8…8,200} | t        | The first degree actors are correct
@@ -372,7 +373,7 @@ WITH text AS (
 
                 <p>Now we can see the test result for the second degree actors is also correct</p>
 
-<pre><code>actual     |    expect     | did_pass |                        text
+<pre><code> actual     |    expect     | did_pass |                        text
 ---------------+---------------+----------+-----------------------------------------------------
  200           | 200           | t        | Each actor can only be in a single "degree" group
  {2,5,8…8,200} | {2,5,8…8,200} | t        | The first degree actors are correct

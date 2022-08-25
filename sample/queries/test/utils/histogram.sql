@@ -8,27 +8,27 @@
 WITH smallest (label, value) AS (
   SELECT
      'min'
-     ,MIN(:col)
-  FROM :tbl
+     ,MIN(:mad_max_col)
+  FROM :mad_max_tbl
 ), largest (label, value) AS (
   SELECT
     'max'
-    ,MAX(:col)
-  FROM :tbl
+    ,MAX(:mad_max_col)
+  FROM :mad_max_tbl
 ), standard_dev_pop (label, value) AS (
   SELECT
     'stddev_pop'
-    ,STDDEV_POP(:col)
-  FROM :tbl
+    ,STDDEV_POP(:mad_max_col)
+  FROM :mad_max_tbl
 ), median (label, value) AS (
   SELECT
      'median'
-    ,PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY :col)
-  FROM :tbl
+    ,PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY :mad_max_col)
+  FROM :mad_max_tbl
 ), median_deviations AS (
   SELECT
-    ABS(:col - median.value) AS absolute_deviation
-  FROM :tbl
+    ABS(:mad_max_col - median.value) AS absolute_deviation
+  FROM :mad_max_tbl
   FULL JOIN median ON TRUE
 ), mad (label, value) AS ( -- median absoluion deviation
   SELECT
@@ -37,10 +37,10 @@ WITH smallest (label, value) AS (
   FROM median_deviations
 ), histo (buckets, count) AS (
   SELECT -- Bucket label is where the bucket starts (inclusive)
-     -- (WIDTH_BUCKET(:col, smallest.count, largest.count, 9) - 1) * (largest.count - smallest.count) / 9 + smallest.count AS buckets
-     (WIDTH_BUCKET(:col, mad.value * -6 + median.value, mad.value * 6 + median.value, 12) - 1) * mad.value + (median.value - 6) AS buckets
+     -- (WIDTH_BUCKET(:mad_max_col, smallest.count, largest.count, 9) - 1) * (largest.count - smallest.count) / 9 + smallest.count AS buckets
+     (WIDTH_BUCKET(:mad_max_col, mad.value * -6 + median.value, mad.value * 6 + median.value, 12) - 1) * mad.value + (median.value - 6) AS buckets
     ,COUNT(*) AS count
-  FROM :tbl
+  FROM :mad_max_tbl
   FULL JOIN smallest ON TRUE
   FULL JOIN largest  ON TRUE
   FULL JOIN median   ON TRUE
