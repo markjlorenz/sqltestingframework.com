@@ -3388,11 +3388,25 @@ pre span.highlight {
 
 /* Header */
 
+  #header .flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #header a {
+    border-bottom: none;
+  }
+
+  #header nav > ul {
+    display: none;
+  }
+
+  #header nav > ul > li{
+    display: block;
+  }
+
 	#header {
-		display: -moz-flex;
-		display: -webkit-flex;
-		display: -ms-flex;
-		display: flex;
 		background-color: #5e42a6;
 		cursor: default;
 		padding: 1.75em 2em;
@@ -3420,7 +3434,7 @@ pre span.highlight {
 			}
 
 				#header > nav > ul > li {
-					display: inline-block;
+					display: block;
 					margin-left: 1.75em;
 					padding: 0;
 					vertical-align: middle;
@@ -3890,6 +3904,10 @@ pre span.highlight {
 			#sidebar {
 				display: none;
 			}
+
+      #header .title > .text {
+        display: none;
+      }
 
 		}
 
