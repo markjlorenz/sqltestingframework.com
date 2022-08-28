@@ -1,0 +1,403 @@
+<!DOCTYPE HTML>
+<!--
+	Hyperspace by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Include, Varibles, and Debugging</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GZFJRFSDHX"></script>
+    <script src="assets/js/analytics.js"></script>
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Include, Variables, and debugging" />
+    <meta name="twitter:description" content="Leverage \include and \set to write more modular queries, and be able to debug them." />
+    <meta name="twitter:image" content="https://www.sqltestingframework.com/images/whats-this-button-do.jpeg" />
+
+    <meta property="og:title" content="Include, Variables, and debugging" />
+    <meta property="og:description" content="Leverage \include and \set to write more modular queries, and be able to debug them." />
+    <meta property="og:image" content="https://www.sqltestingframework.com/images/whats-this-button-do.jpeg" />
+	</head>
+
+	<body class="is-preload">
+
+		<!-- Header -->
+			<header id="header">
+        <div class="flex">
+          <a href="index.html" class="title"><img class="logo" src="/images/logo_transparent.png" /><span class="text"> SQL Testing Framework</span></a>
+          <a href="javascript:void(0);" class="icon hamburger" onclick="toggleBurger()"> <i class="fa fa-bars"></i> </a>
+          <script src="/assets/js/hamburger.js"> </script>
+        </div>
+				<nav>
+					<ul id="menu-links">
+						<li><a href="index.html">Home</a></li>
+						<li><a href="docs.html">Docs</a></li>
+            <li><a href="writing-sql-tests.html">Writing SQL Tests</a></li>
+            <li><a href="testing-sql-query-results.html">Testing SQL Query Results</a></li>
+            <li><a href="precheck-assertions-for-sql-queries.html">Precheck Assertions</a></li>
+            <li><a href="sql-testing-for-skew.html">Testing for Skew</a></li>
+            <li><a class="active" href="include-variables-and-debugging.html">Include, Variables, and Debugging</a></li>
+					</ul>
+				</nav>
+			</header>
+
+      <!-- Wrapper -->
+      <div id="wrapper">
+
+        <!-- Main -->
+        <section id="main" class="wrapper">
+          <div class="inner">
+            <h1 class="major">Include, Variables, and Debugging</h1>
+
+            <p><strong>Goal:</strong> Leverage <code>\include</code> and <code>\set</code> to write more modular queries and be able to debug them.</p>
+            <span class="image fit"><img src="/images/whats-this-button-do.jpeg" alt="It debugs the query, Dee Dee" /></span>
+
+            <h2>Setup</h2>
+
+            <blockquote>See <a href="writing-sql-tests.html">the SQL Testing Framework 101 tutorial</a> for database setup instructions to follow along on your computer.<br/>
+            </blockquote>
+
+
+            <p>It's Saturday evening, and you're enjoying the aurora borealis from your living room when you see a Slack message from Sandy Holcombs, VP of Sales:</p>
+
+            <pre style="white-space: pre-line;">
+> Sandy Holcombs is typing...
+> 👋 HI HI HI👋 On Friday morning the CEO asked me what the percent of rentals for his favorite films were handled by each sales associate.  I need this from you now, and it better be right. OK? Thank you, you're the best!!
+            </pre>
+
+            <p>Oh well, 🤦.  I'm sure the aurora will still be there when you finish this request for Holcombs.  Like everything you've been asked for (except <a href="https://www.sqltestingframework.com/testing-sql-query-results.html">that recursive Kevin Bloom thing</a>), this should be simple enough.</p>
+
+            <h2>Get to work</h2>
+
+            <p>What a moment, Holcombs didn't say which films were the CEOs favorites, and she's 🔴 in Slack now.  That's OK we can handle that with a variable.</p>
+
+<pre><code><span class="highlight">\include '/queries/utils/percent.sql'</span>
+<span class="highlight">\set film_name 'Agent Truman'</span>
+WITH film_by_staff AS (
+  SELECT
+     COUNT(film.title) AS staff_rental
+    ,staff.first_name
+    ,staff.last_name
+  FROM rental
+  JOIN inventory USING(inventory_id)
+  JOIN film USING(film_id)
+  JOIN staff USING(staff_id)
+<span class="highlight">  WHERE film.title = :'film_name'</span>
+  GROUP BY staff_id
+), film_total AS (
+  SELECT
+    COUNT(*) AS total_rental
+  FROM rental
+  JOIN inventory USING(inventory_id)
+  JOIN film USING(film_id)
+<span class="highlight">  WHERE film.title = :'film_name'</span>
+), summary AS (
+  SELECT
+    *
+  FROM film_by_staff
+  FULL JOIN film_total ON TRUE
+)
+
+SELECT
+   first_name
+  ,last_name
+  ,staff_rental
+  ,total_rental
+  ,PERCENT(staff_rental, total_rental) AS pct_of_rental
+FROM summary
+;</code></pre>
+
+            <p>This query makes use of two great PSQL features, <code>\include</code> and <code>\set</code>. <code>\include</code> let's us include other files as if they'd been written in-line. SQL Testing Framework includes some utilities, like a <code>PERCENTAGE</code> function in <code>queries/utils</code> that are meant to be used by <code>\include</code>ing them.</p>
+
+            <p><code>\set</code> defines a variable, that's used later by with a <code>:</code>.  In this case <code>:'film_name'</code>, which will let us put in a placeholder until Holcombs can tell us what the CEO's favorite films are.</p>
+
+            <p>This looks good, let's test it:</p>
+
+<pre><code>\set query '/queries/rentals_of_ceo_favs.sql'
+:setup_test
+WITH text AS (
+  SELECT 'the percentages add up to 100 pct' AS value
+), expect AS (
+  SELECT 100 AS value
+), actual AS (
+  SELECT
+    SUM(pct_of_rental) AS value
+  FROM "/queries/rentals_of_ceo_favs.sql"
+)
+:evaluate_test
+:cleanup_test</code></pre>
+
+            <p>Let's run the test:</p>
+
+<pre><code>$ ./runner.sh rentals_of_ceo_favs.sql
+ ●psql:rentals_of_ceo_favs.sql:4: ERROR:  syntax error at or near "CREATE"
+LINE 4:         CREATE TEMP TABLE "prechecks" (value BOOLEAN)
+                ^
+</code></pre>
+
+            <p>Hmm, an error.  How can we figure out what the problem is?  SQL Testing Framework exposes and environment variable that can help debug errors.  We can define <code>STF_ECHO='queries'</code> to print the output of our test queries, which will help figure out what's wrong.</p>
+
+<pre><code>$ export STF_ECHO='queries'; ./runner.sh rentals_of_ceo_favs.sql
+ ●CREATE OR REPLACE FUNCTION PERCENT(numerator anycompatible, denominator anycompatible)
+RETURNS numeric LANGUAGE plpgsql AS $$
+BEGIN
+    RETURN ROUND(numerator::numeric / denominator::numeric * 100, 2);
+END $$;
+BEGIN;
+CREATE OR REPLACE FUNCTION PERCENT(numerator anycompatible, denominator anycompatible)
+RETURNS numeric LANGUAGE plpgsql AS $$
+BEGIN
+    RETURN ROUND(numerator::numeric / denominator::numeric * 100, 2);
+END $$;
+<span class="highlight">CREATE TEMP TABLE "/queries/rentals_of_ceo_favs.sql"</span>
+<span class="highlight">            ON COMMIT DROP</span>
+<span class="highlight">            AS</span>
+<span class="highlight">        CREATE TEMP TABLE "prechecks" (value BOOLEAN)</span>
+<span class="highlight">          ON COMMIT DROP</span>
+<span class="highlight">        ;</span>
+<span class="highlight">psql:rentals_of_ceo_favs.sql:4: ERROR:  syntax error at or near "CREATE"</span>
+LINE 4:         CREATE TEMP TABLE "prechecks" (value BOOLEAN)</code></pre>
+
+<p>Well that's not going to work.  It doesn't look like our query was loaded into the temp table (and the <code>FUNCTION</code> was defined twice).</p>
+
+            <p>The problem here is that the <code>\include</code> and <code>\set</code> don't really belong in the query file.  If we were using the query interactively, the best way would be to <code>\include</code> and <code>\set</code> the in interactive session, that would be more flexible.</p>
+
+<pre><code>postgres=# \include '/queries/utils/percent.sql'
+CREATE FUNCTION
+postgres=# \set film_name 'Agent Truman'
+postgres=# \include rentals_of_ceo_favs.sql
+ first_name | last_name | staff_rental | total_rental | pct_of_rental
+------------+-----------+--------------+--------------+---------------
+ Mike       | Hillyer   |           11 |           21 |         52.38
+ Jon        | Stephens  |           10 |           21 |         47.62
+(2 rows)
+</code></pre>
+
+            <p>Let's remove those from the query file and put them in the test file instead:</p>
+
+<pre><code><span class="highlight">-- \include '/queries/utils/percent.sql'</span>
+<span class="highlight">-- \set film_name 'Agent Truman'</span>
+WITH film_by_staff AS (
+  SELECT
+     COUNT(film.title) AS staff_rental
+    ,staff.first_name
+    ,staff.last_name
+  FROM rental
+  JOIN inventory USING(inventory_id)
+  JOIN film USING(film_id)
+  JOIN staff USING(staff_id)
+  WHERE film.title = :'film_name'
+  GROUP BY staff_id
+), film_total AS (
+  SELECT
+    COUNT(*) AS total_rental
+  FROM rental
+  JOIN inventory USING(inventory_id)
+  JOIN film USING(film_id)
+  WHERE film.title = :'film_name'
+), summary AS (
+  SELECT
+    *
+  FROM film_by_staff
+  FULL JOIN film_total ON TRUE
+)
+
+SELECT
+   first_name
+  ,last_name
+  ,staff_rental
+  ,total_rental
+  ,PERCENT(staff_rental, total_rental) AS pct_of_rental
+FROM summary
+;</code></pre>
+
+<pre><code><span class="highlight">\set film_name 'Agent Truman'</span>
+<span class="highlight">\include '/queries/utils/percent.sql'</span>
+\set query '/queries/rentals_of_ceo_favs.sql'
+:setup_test
+WITH text AS (
+  SELECT 'the percentages add up to 100 pct' AS value
+), expect AS (
+  SELECT 100 AS value
+), actual AS (
+  SELECT
+    SUM(pct_of_rental) AS value
+  FROM "/queries/rentals_of_ceo_favs.sql"
+)
+:evaluate_test
+:cleanup_test</code></pre>
+
+            <p>And run the test file again with queries echo on:</p>
+
+<pre><code>$ export STF_ECHO='queries'; ./runner.sh rentals_of_ceo_favs.sql
+ ●CREATE OR REPLACE FUNCTION PERCENT(numerator anycompatible, denominator anycompatible)
+RETURNS numeric LANGUAGE plpgsql AS $$
+BEGIN
+    RETURN ROUND(numerator::numeric / denominator::numeric * 100, 2);
+END $$;
+BEGIN;
+<span class="highlight">CREATE TEMP TABLE "/queries/rentals_of_ceo_favs.sql"</span>
+<span class="highlight">            ON COMMIT DROP</span>
+<span class="highlight">            AS</span>
+<span class="highlight"></span>
+<span class="highlight">WITH film_by_staff AS (</span>
+<span class="highlight">  SELECT</span>
+<span class="highlight">     COUNT(film.title) AS staff_rental</span>
+<span class="highlight">    ,staff.first_name</span>
+<span class="highlight">    ,staff.last_name</span>
+<span class="highlight">  FROM rental</span>
+<span class="highlight">  JOIN inventory USING(inventory_id)</span>
+<span class="highlight">  JOIN film USING(film_id)</span>
+<span class="highlight">  JOIN staff USING(staff_id)</span>
+<span class="highlight">  WHERE film.title = 'Agent Truman'</span>
+<span class="highlight">  GROUP BY staff_id</span>
+<span class="highlight">), film_total AS (</span>
+<span class="highlight">  SELECT</span>
+<span class="highlight">    COUNT(*) AS total_rental</span>
+<span class="highlight">  FROM rental</span>
+<span class="highlight">  JOIN inventory USING(inventory_id)</span>
+<span class="highlight">  JOIN film USING(film_id)</span>
+<span class="highlight">  WHERE film.title = 'Agent Truman'</span>
+<span class="highlight">), summary AS (</span>
+<span class="highlight">  SELECT</span>
+<span class="highlight">    *</span>
+<span class="highlight">  FROM film_by_staff</span>
+<span class="highlight">  FULL JOIN film_total ON TRUE</span>
+<span class="highlight">)</span>
+<span class="highlight"></span>
+<span class="highlight">SELECT</span>
+<span class="highlight">   first_name</span>
+<span class="highlight">  ,last_name</span>
+<span class="highlight">  ,staff_rental</span>
+<span class="highlight">  ,total_rental</span>
+<span class="highlight">  ,PERCENT(staff_rental, total_rental) AS pct_of_rental</span>
+<span class="highlight">FROM summary</span>
+<span class="highlight">          ;</span>
+CREATE TEMP TABLE "prechecks" (value BOOLEAN)
+          ON COMMIT DROP
+        ;
+WITH text AS (
+  SELECT 'the percentages add up to 100 pct' AS value
+), expect AS (
+  SELECT 100 AS value
+), actual AS (
+  SELECT
+    SUM(pct_of_rental) AS value
+  FROM "/queries/rentals_of_ceo_favs.sql"
+)
+        INSERT INTO stf.test_results (
+           run_id
+          ,filename
+          ,actual
+          ,expect
+          ,did_pass
+          ,text
+        )
+        SELECT
+           1661659229 AS run_id
+          ,'rentals_of_ceo_favs.sql' AS filename
+          ,actual.value AS actual
+          ,expect.value AS expect
+          ,actual.value IS NOT DISTINCT FROM expect.value AS did_pass
+          ,text.value AS text
+        FROM actual
+        FULL JOIN expect    ON TRUE
+        FULL JOIN text      ON TRUE
+        ;
+CREATE TEMP TABLE IF NOT EXISTS "prechecks" (value BOOLEAN)
+        ;
+WITH latest_test_run AS (
+          SELECT * FROM stf.test_results
+          ORDER BY id DESC
+          LIMIT 1
+        ), aggregated_prechecks AS (
+          SELECT
+             latest_test_run.id AS id
+             ,ARRAY_REMOVE(ARRAY_AGG(prechecks.value), NULL) AS value
+          FROM latest_test_run
+          FULL JOIN "prechecks" ON TRUE
+          GROUP BY latest_test_run.id
+        )
+        UPDATE stf.test_results
+        SET precheck = aggregated_prechecks.value
+        FROM aggregated_prechecks
+        WHERE aggregated_prechecks.id = stf.test_results.id
+        ;
+COMMIT;
+
+ actual | expect | did_pass |               text
+--------+--------+----------+-----------------------------------
+ 100.00 | 100    | true     | the percentages add up to 100 pct
+(1 row)
+</code></pre>
+
+            <p>Much better.  When things aren't working as expected <code>STF_ECHO='queries'</code> is a very helpful way to figure out what's going wrong.</p>
+
+            <h2>Bonus</h2>
+
+            <p>A test like this also a great example of when to use a precheck.  What if there were no rentals for <strong>Agent Truman</strong>?  With a simple precheck our final test looks likes this:</p>
+
+<pre><code>\set film_name 'Agent Truman'
+\include '/queries/utils/percent.sql'
+\set query '/queries/rentals_of_ceo_favs.sql'
+:setup_test
+WITH text AS (
+  SELECT 'the percentages add up to 100 pct' AS value
+<span class="highlight">), precheck_there_are_rentals AS (</span>
+<span class="highlight">  INSERT INTO :"prechecks" (value)</span>
+<span class="highlight">  SELECT COALESCE(SUM(staff_rental) > 0, FALSE)</span>
+<span class="highlight">  FROM "/queries/rentals_of_ceo_favs.sql"</span>
+), expect AS (
+  SELECT 100 AS value
+), actual AS (
+  SELECT
+    SUM(pct_of_rental) AS value
+  FROM "/queries/rentals_of_ceo_favs.sql"
+)
+:evaluate_test
+:cleanup_test
+</code></pre>
+
+<pre><code>$ ./runner.sh rentals_of_ceo_favs.sql
+ ●
+ actual | expect | did_pass |               text
+--------+--------+----------+-----------------------------------
+ 100.00 | 100    | true     | the percentages add up to 100 pct
+(1 row)
+</code></pre>
+
+            <p>Now we can get back to the aurora and when Holcombs back online and let's us know what films the CEO likes we can plug those in and also, as we were warned "better be right."  Just another Saturday at StreamBuster!</p>
+
+            <p class="align-center">The code for this example is <a href="https://github.com/markjlorenz/sqltestingframework.com" class="button brands icon solid fa-github"> available on Github</a></p>
+
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Footer -->
+			<footer id="footer" class="wrapper style1-alt">
+				<div class="inner">
+					<ul class="menu">
+						<li>&copy;2022 Mark J. Lorenz. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
